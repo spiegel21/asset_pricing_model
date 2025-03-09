@@ -11,6 +11,11 @@ def train_model():
     numeric_cols = list(set(df_returns.columns) - set(["DATE", "TICKER"]))
     df_returns[numeric_cols] = df_returns[numeric_cols].apply(pd.to_numeric, errors='coerce')
 
+    # Lag all columns related to price in order to avoid lookahead bias
+    price_cols = list(set(df_returns.columns) - set(["DATE", "TICKER", "vwretd"]))
+    df_returns[price_cols] = df_returns.groupby('TICKER')[price_cols].shift(1)
+    df_returns = df_returns.dropna()
+
     # Remove the last year of data for evaluation
     df_eval = df_returns[df_returns['DATE'] >= '2019-01-01']
     df_train = df_returns[df_returns['DATE'] < '2019-01-01']
@@ -66,3 +71,4 @@ def train_model():
     plt.show()
 
     return None
+    
